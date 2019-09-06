@@ -23,6 +23,7 @@
             <div class="img-thumbnail">
                 <img class="img-fluid" src="<%= campground.image %>">
                 <p><%= campground.name %><p>
+                <p><a href="/campgrounds/<%= campground._id %>" class="btn btn-primary">More Info</a></p>
             </div>
         </div>
         <% }); %>

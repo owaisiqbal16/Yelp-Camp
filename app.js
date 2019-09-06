@@ -11,14 +11,16 @@ app.set("view engine", "ejs");
 //Schema Setup
 var campgroundSchema = new mongoose.Schema({
     name: String,
-    image: String
+    image: String,
+    description: String
 });
 //Making model with above schema
 var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create({
 //     name: "Campground 2",
-//     image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
+//     image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
+//     description : "This is a nice campground"
 // }, function (err, campground) {
 //     if (err) {
 //         console.log(err)
@@ -40,6 +42,7 @@ app.get("/", function (req, res) {
     res.render("landing");
 })
 
+//INDEX ROUTE - Show all campgrounds
 app.get("/campgrounds", function (req, res) {
     //Get all campgrounds from db
     Campground.find({}, function (err, allCampgrounds) {
@@ -47,20 +50,18 @@ app.get("/campgrounds", function (req, res) {
             console.log(err)
         }
         else {
-            res.render("campgrounds", { campgrounds: allCampgrounds })
+            res.render("index", { campgrounds: allCampgrounds })
         }
     })
 })
 
-app.get("/campgrounds/new", function (req, res) {
-    res.render("new.ejs");
-})
-
+//CREATE ROUTE - Add new campground to database
 app.post("/campgrounds", function (req, res) {
     //Get data from form and add to the db
     var name = req.body.name;
     var image = req.body.image;
-    var newCampground = { name: name, image: image };
+    var desc = req.body.description;
+    var newCampground = { name: name, image: image, description: desc };
     //Create a new campground and save to dbs
     Campground.create(newCampground, function (err, newlyCreated) {
         if (err) {
@@ -69,6 +70,25 @@ app.post("/campgrounds", function (req, res) {
         else {
             //redirect back to campgrounds page
             res.redirect("/campgrounds");
+        }
+    })
+})
+
+// NEW ROUTE - Show form to create new campground
+app.get("/campgrounds/new", function (req, res) {
+    res.render("new.ejs");
+})
+
+// SHOW ROUTE - Show detailed information for the clicked campground
+app.get("/campgrounds/:id", function (req, res) {
+    //find the campground with the provided id
+    var myId = req.params.id
+    Campground.findById(myId, function (err, foundCampground) {
+        if (err) {
+            console.log(err)
+        } else {
+            //render show tempelate with that campground
+            res.render("show", { campground: foundCampground });
         }
     })
 })
