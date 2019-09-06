@@ -1,41 +1,78 @@
-var express = require('express');
-var app = express();
-var bodyParser = require("body-parser");
+var express = require('express'),
+    app = express(),
+    bodyParser = require("body-parser"),  //to use req.body
+    mongoose = require("mongoose");
 
-app.use(bodyParser.urlencoded({extended : true }));
+mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
-var campgrounds = [
-    { name: "Campground 1" , image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
-    { name: "Campground 2" , image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" },
-    { name: "Campground 3" , image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
-    { name: "Campground 4" , image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" },
-    { name: "Campground 5" , image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
-    { name: "Campground 6" , image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" }
-]
 
-app.get("/", function(req,res){
+//Schema Setup
+var campgroundSchema = new mongoose.Schema({
+    name: String,
+    image: String
+});
+//Making model with above schema
+var Campground = mongoose.model("Campground", campgroundSchema);
+
+// Campground.create({
+//     name: "Campground 2",
+//     image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
+// }, function (err, campground) {
+//     if (err) {
+//         console.log(err)
+//     } else {
+//         console.log(campground)
+//     }
+// });
+
+// var campgrounds = [
+//     { name: "Campground 1", image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
+//     { name: "Campground 2", image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" },
+//     { name: "Campground 3", image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
+//     { name: "Campground 4", image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" },
+//     { name: "Campground 5", image: "https://images.unsplash.com/photo-1567206848494-680aa0e4477e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80" },
+//     { name: "Campground 6", image: "https://images.unsplash.com/photo-1567090981547-01af53b23a7e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60" }
+// ]
+
+app.get("/", function (req, res) {
     res.render("landing");
 })
 
-app.get("/campgrounds", function(req,res){
-
-    res.render("campgrounds", {campgrounds:campgrounds});
+app.get("/campgrounds", function (req, res) {
+    //Get all campgrounds from db
+    Campground.find({}, function (err, allCampgrounds) {
+        if (err) {
+            console.log(err)
+        }
+        else {
+            res.render("campgrounds", { campgrounds: allCampgrounds })
+        }
+    })
 })
 
-app.get("/campgrounds/new", function(req,res){
+app.get("/campgrounds/new", function (req, res) {
     res.render("new.ejs");
 })
 
-app.post("/campgrounds", function(req,res){
+app.post("/campgrounds", function (req, res) {
+    //Get data from form and add to the db
     var name = req.body.name;
     var image = req.body.image;
-    var newCampground = {name : name , image : image};
-    campgrounds.push(newCampground);
-
-    res.redirect("/campgrounds");
+    var newCampground = { name: name, image: image };
+    //Create a new campground and save to dbs
+    Campground.create(newCampground, function (err, newlyCreated) {
+        if (err) {
+            console.log(err)
+        }
+        else {
+            //redirect back to campgrounds page
+            res.redirect("/campgrounds");
+        }
+    })
 })
 
-app.listen(3000,function(){
+app.listen(3000, function () {
     console.log("Server is running at 3000");
 })
