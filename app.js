@@ -1,21 +1,12 @@
 var express = require('express'),
     app = express(),
     bodyParser = require("body-parser"),  //to use req.body
-    mongoose = require("mongoose");
+    mongoose = require("mongoose"),
+    Campground = require("./models/campground"); //can use any name rather than campground
 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true });
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-
-
-//Schema Setup
-var campgroundSchema = new mongoose.Schema({
-    name: String,
-    image: String,
-    description: String
-});
-//Making model with above schema
-var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create({
 //     name: "Campground 2",
