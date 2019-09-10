@@ -28,6 +28,17 @@ passport.use(new localStrategy(User.authenticate()));  //User.authenticate() com
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+
+//Below defined is a middleware which helps us to pass the variable currentUser to every page we rendered below
+//and we don't have to pass it separately in all the route functions like
+//res.render("campgrounds/index", { currentUser : req.user })
+//req.user contains information about the user only if logged in.. otherwise it's undefined
+//we used this info in the header to display related links.
+app.use(function(req,res,next){
+    res.locals.currentUser = req.user;
+    next();
+});
+
 // =============
 // R O U T I N G
 // =============
@@ -43,7 +54,7 @@ app.get("/campgrounds", function (req, res) {
             console.log(err)
         }
         else {
-            res.render("campgrounds/index", { campgrounds: allCampgrounds })
+            res.render("campgrounds/index", { campgrounds: allCampgrounds , currentUser : req.user })
         }
     })
 })
