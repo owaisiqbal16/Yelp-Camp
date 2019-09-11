@@ -20,9 +20,13 @@
                         <%= campground.description %>
                     </p>
                     <p>
-                        <em> Submitted by <%= campground.author.username %> </em>
-                        <a href="/campgrounds/<%= campground._id %>/edit" class="btn btn-warning">Edit</a>
+                        <em> Submitted by
+                            <%= campground.author.username %> </em>
                     </p>
+                    <a href="/campgrounds/<%= campground._id %>/edit" class="btn btn-warning">Edit</a>
+                    <form id="delete-form" method="POST" action="/campgrounds/<%= campground._id %>?_method=DELETE">
+                        <button class="btn btn-danger">Delete</button>
+                    </form>
                 </div>
             </div>
             <div class="card card-body bg-light">
@@ -31,15 +35,16 @@
                 </div>
                 <hr>
                 <% campground.comments.forEach(function(comment){ %>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <strong><%= comment.author.username %></strong>
-                            <span class="float-right">10 days ago</span>
-                            <p>
-                                <%= comment.text %>
-                            </p>
-                        </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong>
+                            <%= comment.author.username %></strong>
+                        <span class="float-right">10 days ago</span>
+                        <p>
+                            <%= comment.text %>
+                        </p>
                     </div>
+                </div>
                 <% }); %>
 
             </div>
